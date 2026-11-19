@@ -27,4 +27,4 @@ The `tools/` directory contains the existing skin generators. There are no third
 
 ## 许可证
 
-本仓库的原创插件代码采用 [0BSD 许可证](LICENSE)。第三方代码及素材遵循各自的许可证或授权条款。
+本仓库的原创插件代码采用 [MIT 许可证](LICENSE)。第三方代码及素材遵循各自的许可证或授权条款。
