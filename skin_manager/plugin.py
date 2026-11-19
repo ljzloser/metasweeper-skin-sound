@@ -65,7 +65,7 @@ class SkinManagerPlugin(BasePlugin[SkinManagerConfig]):
             # name 是配置目录、日志、状态键与授权记录的稳定标识，不随语言变化
             name="皮肤与音效",
             display_name=_translate("SkinManagerPlugin", "皮肤与音效"),
-            version="1.1.0",
+            version="1.1.1",
             description=_translate("SkinManagerPlugin",
                 "设置页分别选择皮肤与音效包，运行时热替换（纯内存、不重启）；"
                 "两者为相互独立的功能与授权"
