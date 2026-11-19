@@ -24,3 +24,7 @@ The stable plugin name is `皮肤与音效`; plugin data remains under `data/plu
 The package directory is the repository's top-level plugin package and exports `SkinManagerPlugin` from `skin_manager/__init__.py`. Bundled resources are resolved relative to this package. Skin and sound ZIP imports are stored in the stable plugin data directory.
 
 The `tools/` directory contains the existing skin generators. There are no third-party runtime requirements.
+
+## 许可证
+
+本仓库的原创插件代码采用 [0BSD 许可证](LICENSE)。第三方代码及素材遵循各自的许可证或授权条款。
