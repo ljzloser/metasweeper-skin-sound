@@ -1,11 +1,6 @@
-# 皮肤与音效管理插件
+# 皮肤管理插件
 
-设置页**两个独立下拉框**：一个选皮肤、一个选音效包。运行时热替换，
-**纯内存、即时生效、不写游戏目录、不重启**。主进程退出后自动还原。
-
-> **皮肤与音效相互独立**：两套目录扫描、两套配置项、两套发送逻辑，
-> 以及**两条独立的控制授权**（`SetSkinCommand` / `SetSoundCommand`）。
-> 只授权其中一个，对应功能仍可独立使用；改音效设置不会动皮肤，反之亦然。
+通过设置页选择或导入皮肤，立即应用，无需重启。
 
 内置八套完整皮肤，覆盖冷暖浅色、蓝色、石墨灰、复古绿、霓虹紫与纯色线索：
 
@@ -33,42 +28,9 @@
 
 ## 使用
 
-1. 启用插件后，在插件管理器里右键插件 → **🔐 一键授权控制权限**。
-   `SetSkinCommand` 与 `SetSoundCommand` 是**两条独立授权**，各自只能授权给一个插件；
-   两个都授权才能同时使用皮肤与音效功能。
-2. 右键插件 → **⚙️ 设置...**：
-   - **皮肤**：「当前皮肤」下拉框，选「默认皮肤（不替换）」即还原。
-     「导入皮肤包」点按钮选 zip，自动解压到插件数据目录后即可在下拉框选择。
-   - **音效**（与皮肤独立）：「启用游戏音效」「音效音量」「当前音效包」
-     「导入音效包」。改动后立即通过 `SetSoundCommand` 热生效。
-3. 插件标签页显示最近一次应用结果；皮肤可点「重新应用」，音效可选事件点「播放」试听。
-
-> **不再需要手填外部目录**：皮肤包与音效包都改为「导入 zip」，自动落地到
-> 插件自己的数据目录 `data/plugin_data/SkinManagerPlugin/{skins,sounds}/`。
-
-## 音效包的归属
-
-**音效包的选择完全由本插件负责**。主程序只保留 `host `media/`sounds/*.wav`
-这一组默认资源（每个事件一个固定文件名的 wav），以及游戏设置页里的
-「游戏音效」开关与音量；主程序设置页不再有任何音效包下拉框或额外目录输入框。
-
-- 插件自带的示例包 `soft/` 位于 `skin_manager/sounds/`，随插件分发；
-  插件初始化时通过 `seed_builtin_sound_packs()` 播种到可写数据目录
-  `data/plugin_data/SkinManagerPlugin/sounds/`（只补缺失、不覆盖用户数据），
-  因此开箱即可在「当前音效包」下拉框里选到。
-- 用户用「导入音效包」zip 安装的包也落在同一个数据目录；该目录通过
-  `SetSoundCommand.extra_dir` 传给主进程，主进程据此 `resolve()` 到包内 wav。
-- 打包版两个进程都由 plugin package copied under the host `plugins/` directory 分发插件目录，
-  且共享同一个 `--data-dir`，所以内置示例包与 zip 导入包在打包版同样可用。
-
-包格式不变：一个子目录就是一个包，`sound.json` 提供显示名，固定文件名
-（`open.wav` / `win.wav` …）按需提供；**缺哪个 cue 就沿用主程序根目录的
-默认 wav**。包名必须是单层目录名（不含 `/`、`..`）。
-
-> 下拉框不是手写 UI，而是 `config.py` 在模块导入时扫描皮肤目录、
-> 自动注册成 `ChoiceConfig` 选项（与 `clipboard_replay` 的
-> `add_handler_fields` 同一套路）。**新增皮肤目录即自动出现在下拉框里**，
-> 不需要改任何 Python 代码（新增后需重启插件管理器或重开设置页）。
+1. 启用插件，在插件管理器授权 `SetSkinCommand`。
+2. 右键插件打开设置，在「当前皮肤」选择皮肤，或用「导入皮肤包」选取 ZIP。
+3. 插件标签页显示应用结果，也可以点「重新应用」。选「默认皮肤」即可还原。
 
 ## 自动注册机制
 
@@ -192,45 +154,3 @@ skins/
 
 「复制局面为 SVG」也已适配内存源，导出结果与屏幕一致；
 PNG 截图走 `render()`，天然跟随新皮肤。
-
-## 音效（独立功能）
-
-音效走**另一条链路**，与上面的换肤字节传输毫无关系：
-
-```
-插件设置（sound_* 字段）
-  → skin_manager/sound.py 只扫描目录名、构造 SetSoundCommand
-  → ZMQ 主进程 handler（app/sound_applier.py）
-  → utils/sound_manager.SoundManager.configure() / play()
-```
-
-- **命令**：`shared_types.commands.SetSoundCommand`，独立 tag `set_sound`，
-  字段 `enabled` / `volume` / `pack` / `extra_dir` / `reset` / `play_event`。
-  已加入 `COMMAND_TYPES` 全局注册表，授权列表里可见「更改音效」。
-- **不传输 wav 字节**：插件只发音效包**目录名**，素材由主进程从
-  `media/sounds/` 自行读取（缺文件自动回退默认，见 `media/sounds/README.md`）。
-- **纯内存热更新**：不写 `gameSetting.ini`、不重启；`reset=True` 精确还原
-  主进程启动时从 ini 读入的设置。插件关闭时也会发一次 reset。
-- **试听**：标签页选事件点「播放」→ `SetSoundCommand(play_event=...)`，
-  主进程在应用设置后播一声。
-- **两个独立授权**：`SetSkinCommand` 与 `SetSoundCommand` 各自独占授权，
-  互不影响；只授权其中一个也能用对应功能。
-
-### zip 导入与目录扫描
-
-`zip_import.py` 是皮肤与音效**共用的独立模块**：
-
-- 「导入 zip」按钮把包解压到插件数据目录的 `skins/` 或 `sounds/`。
-  zip 里只有一层公共根目录时会自动剥掉，并用该根目录名作为包名；
-  否则用 zip 文件名。读取包内 `skin.json` / `sound.json` 的 `name` 作为显示名。
-- 安全限制（参照 `plugin_manager/plugin_download.py`）：拒绝绝对路径、`..`、
-  非法字符、符号链接、非白名单后缀；单文件 ≤ 8 MB、单次解压 ≤ 32 MB、≤ 512 个条目；
-  先解压到临时目录，全部成功后再原子替换，避免半包。
-- 皮肤扫描：自带 `skins/` → 插件数据目录 `skins/`。
-- 音效扫描：主进程 `media/sounds/` → 插件数据目录 `sounds/` → 插件自带 `sounds/`。
-- **跨进程关键点**：音效包由主进程读取，插件数据目录主进程默认看不到，
-  所以 `build_sound_command()` 会把 `extra_dir` 固定指向插件数据目录 `sounds/`，
-  主进程的 `SoundManager.resolve()` 才能找到导入的包。
-
-导入完成后触发 `config_changed`（`skin_zip` / `sound_zip`），插件重新扫描并刷新
-下拉框，无需重启或改代码。

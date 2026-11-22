@@ -14,4 +14,4 @@ The plugin market index is maintained by the application project; plugin publish
 
 ## Compatibility
 
-Keep the plugin package directory named `skin_manager`, the PluginInfo name `皮肤与音效`, and the class-based data directory identity `SkinManagerPlugin`. These identify the package, persisted configuration/state, and existing user data. The host application owns `SetSkinCommand` and `SetSoundCommand` processing; the plugin declares and sends those host controls. Keep the bundled assets and all four translation catalogs in each source release.
+Keep the plugin package directory named `skin_manager`, the PluginInfo name `皮肤与音效`, and the class-based data directory identity `SkinManagerPlugin`. These identify the package, persisted configuration/state, and existing user data. The host application owns `SetSkinCommand` processing; the plugin declares and sends this control. Keep the bundled assets and all four translation catalogs in each source release.

@@ -16,21 +16,9 @@
             <translation>現在のスキン&gt;</translation>
         </message>
         <message>
-            <location filename="../config.py" line="77" />
-            <location filename="../config.py" line="134" />
-            <source>当前音效包</source>
-            <translation>現在の効果音パック&gt;</translation>
-        </message>
-        <message>
             <location filename="../config.py" line="78" />
             <location filename="../config.py" line="99" />
             <source>选择后立即生效（纯内存热替换，不重启）；选「默认皮肤」即还原</source>
-            <translation>即時反映（メモリ内・再起動不要）。既定を選ぶと元に戻ります&gt;</translation>
-        </message>
-        <message>
-            <location filename="../config.py" line="80" />
-            <location filename="../config.py" line="136" />
-            <source>选择后立即生效（纯内存热替换，不重启）；选「默认音效」即还原</source>
             <translation>即時反映（メモリ内・再起動不要）。既定を選ぶと元に戻ります&gt;</translation>
         </message>
         <message>
@@ -40,8 +28,8 @@
         </message>
         <message>
             <location filename="../config.py" line="90" />
-            <source>插件启动并连接主进程后，自动应用上次选择的皮肤与音效设置</source>
-            <translation>接続後に前回のスキン・効果音設定を自動で再適用します&gt;</translation>
+            <source>插件启动并连接主进程后，自动应用上次选择的皮肤</source>
+            <translation>接続後に前回選択したスキンを適用します</translation>
         </message>
         <message>
             <location filename="../config.py" line="106" />
@@ -59,55 +47,9 @@
             <translation>zip を skins/ に展開後、ドロップダウンに表示されます&gt;</translation>
         </message>
         <message>
-            <location filename="../config.py" line="117" />
-            <source>启用游戏音效</source>
-            <translation>ゲーム効果音を有効化&gt;</translation>
-        </message>
-        <message>
-            <location filename="../config.py" line="118" />
-            <source>通过 SetSoundCommand 独立控制；不影响主程序设置页里的开关</source>
-            <translation>SetSoundCommand で独立制御。ゲーム設定のスイッチとは別です&gt;</translation>
-        </message>
-        <message>
-            <location filename="../config.py" line="125" />
-            <source>音效音量</source>
-            <translation>効果音の音量&gt;</translation>
-        </message>
-        <message>
-            <location filename="../config.py" line="129" />
-            <source>0~100，选择后立即生效</source>
-            <translation>0～100、即時反映&gt;</translation>
-        </message>
-        <message>
-            <location filename="../config.py" line="135" />
-            <location filename="../sound.py" line="81" />
-            <source>默认音效</source>
-            <translation>既定の効果音</translation>
-        </message>
-        <message>
-            <location filename="../config.py" line="143" />
-            <source>导入音效包</source>
-            <translation>効果音パックをインポート&gt;</translation>
-        </message>
-        <message>
-            <location filename="../config.py" line="145" />
-            <source>导入音效 zip</source>
-            <translation>効果音 zip をインポート&gt;</translation>
-        </message>
-        <message>
-            <location filename="../config.py" line="146" />
-            <source>选择 zip 自动解压到本插件数据目录 sounds/，随后即可在下拉框选择</source>
-            <translation>zip を sounds/ に展開後、ドロップダウンに表示されます&gt;</translation>
-        </message>
-        <message>
-            <location filename="../plugin.py" line="67" />
-            <source>皮肤与音效</source>
-            <translation>スキンと効果音</translation>
-        </message>
-        <message>
             <location filename="../plugin.py" line="69" />
-            <source>设置页分别选择皮肤与音效包，运行时热替换（纯内存、不重启）；两者为相互独立的功能与授权</source>
-            <translation>設定でスキンと効果音パックを個別に選択し、再起動なしで適用します。機能と権限は独立しています</translation>
+            <source>在设置页选择或导入皮肤，立即应用，无需重启。</source>
+            <translation>設定でスキンを選択またはインポートすると、再起動せずにすぐ適用されます。</translation>
         </message>
         <message>
             <location filename="../plugin.py" line="131" />
@@ -134,96 +76,6 @@
             <location filename="../plugin.py" line="211" />
             <source>已应用：{detail}</source>
             <translation>適用済み: {detail}</translation>
-        </message>
-        <message>
-            <location filename="../plugin.py" line="193" />
-            <source>音效参数无效：{error}</source>
-            <translation>効果音のパラメーターが無効: {error}</translation>
-        </message>
-        <message>
-            <location filename="../plugin.py" line="198" />
-            <source>主进程未响应（可能尚未连接或未授权 SetSoundCommand）</source>
-            <translation>メインプロセスが応答しません（未接続またはSetSoundCommandが未許可の可能性があります）</translation>
-        </message>
-        <message>
-            <location filename="../plugin.py" line="202" />
-            <source>音效应用失败：{error}</source>
-            <translation>効果音の適用に失敗: {error}</translation>
-        </message>
-        <message>
-            <location filename="../plugin.py" line="207" />
-            <source>音效（{state}，音量 {volume}，包 {pack}）</source>
-            <translation>効果音（{state}、音量 {volume}、パック {pack}）</translation>
-        </message>
-        <message>
-            <location filename="../plugin.py" line="208" />
-            <source>开</source>
-            <translation>オン</translation>
-        </message>
-        <message>
-            <location filename="../plugin.py" line="208" />
-            <source>关</source>
-            <translation>オフ</translation>
-        </message>
-        <message>
-            <location filename="../plugin.py" line="209" />
-            <source>默认</source>
-            <translation>既定</translation>
-        </message>
-        <message>
-            <location filename="../sound.py" line="96" />
-            <source>未知音效事件: {event}</source>
-            <translation>不明な効果音イベント: {event}</translation>
-        </message>
-        <message>
-            <location filename="../sound.py" line="98" />
-            <source>音量超出范围: {volume}</source>
-            <translation>音量が範囲外です: {volume}</translation>
-        </message>
-        <message>
-            <location filename="../sound.py" line="100" />
-            <source>非法音效包名: {pack}</source>
-            <translation>無効な効果音パック名: {pack}</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="30" />
-            <source>就绪</source>
-            <translation>準備完了&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="31" />
-            <source>开局</source>
-            <translation>開始&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="32" />
-            <source>开格</source>
-            <translation>開格&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="33" />
-            <source>双击</source>
-            <translation>ダブルクリック&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="34" />
-            <source>插旗</source>
-            <translation>旗を立てる&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="35" />
-            <source>拔旗</source>
-            <translation>旗を外す&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="36" />
-            <source>胜利</source>
-            <translation>勝利</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="37" />
-            <source>失败</source>
-            <translation>敗北</translation>
         </message>
         <message>
             <location filename="../widgets.py" line="53" />
@@ -256,31 +108,6 @@
             <location filename="../widgets.py" line="75" />
             <source>在插件「设置...」里用「导入皮肤包」按钮安装 zip，或把资源放到插件目录 skins/&lt;名称&gt;/ 下，导入后即自动出现在下拉框里。</source>
             <translation>「設定」の「スキンパックをインポート」、または skins/&lt;名前&gt;/ に配置するとドロップダウンに表示されます。&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="85" />
-            <source>音效</source>
-            <translation>効果音&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="88" />
-            <source>在插件「设置...」里分别设置「启用游戏音效」「音效音量」「当前音效包」，与皮肤设置相互独立，互不影响。授权也是独立的 SetSoundCommand。</source>
-            <translation>「設定」で有効化・音量・パックを個別に設定。スキンとは独立し、認可も別の SetSoundCommand です。&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="96" />
-            <source>试听：</source>
-            <translation>試聴：&gt;</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="105" />
-            <source>播放</source>
-            <translation>再生</translation>
-        </message>
-        <message>
-            <location filename="../widgets.py" line="106" />
-            <source>按当前音效设置发送试听请求（需已授权 SetSoundCommand）</source>
-            <translation>現在の設定で試聴リクエストを送信（SetSoundCommand の認可が必要）&gt;</translation>
         </message>
         <message>
             <location filename="../zip_import.py" line="91" />
@@ -324,8 +151,8 @@
         </message>
         <message>
             <location filename="../zip_import.py" line="211" />
-            <source>压缩包内没有找到任何皮肤/音效资源（可能需要检查目录结构）</source>
-            <translation>アーカイブ内にスキン・効果音リソースがありません。ディレクトリ構成を確認してください</translation>
+            <source>压缩包内没有找到任何皮肤资源（可能需要检查目录结构）</source>
+            <translation>アーカイブ内にスキンリソースがありません。ディレクトリ構造を確認してください。</translation>
         </message>
         <message>
             <location filename="../zip_import.py" line="235" />

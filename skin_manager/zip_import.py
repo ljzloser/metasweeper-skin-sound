@@ -1,14 +1,4 @@
-"""皮肤 / 音效包 zip 导入（共用、与皮肤和音效逻辑均独立）。
-
-把用户选的 zip 解压到**插件自己的数据目录**下，而不是让用户手填外部目录：
-- 皮肤包 -> `<插件数据目录>/skins/<包名>/`
-- 音效包 -> `<插件数据目录>/sounds/<包名>/`
-
-安全性参照 `plugin_manager/plugin_download.py` 的做法：
-拒绝绝对路径、`..`、非法字符、Windows 保留设备名、符号链接、超大文件与
-zip-slip。上限按目标类型区分，与主进程 skin_applier 的解码上限对齐，避免
-「导入成功、应用失败」。
-"""
+"""校验皮肤 ZIP，并将资源导入插件数据目录。"""
 from __future__ import annotations
 
 import os
@@ -27,21 +17,18 @@ from utils.plugin_i18n import PluginTranslate
 
 _translate = PluginTranslate("SkinManagerPlugin")
 
-# 防护上限：按目标类型区分（与主进程 skin_applier.py 的 512KB/4MB 对齐）
-_LIMITS = {
-    "skins": (512 * 1024, 4 * 1024 * 1024),
-    "sounds": (8 * 1024 * 1024, 32 * 1024 * 1024),
-}
+_MAX_SINGLE = 512 * 1024
+_MAX_TOTAL = 4 * 1024 * 1024
 _MAX_ENTRIES = 512
 _CHUNK = 64 * 1024
 
 # 允许的包内资源后缀（防止塞入可执行脚本）；只保留固定文件名格式会用到的
-_ALLOWED_SUFFIXES = {".svg", ".png", ".jpg", ".jpeg", ".wav", ".json"}
+_ALLOWED_SUFFIXES = {".svg", ".png", ".jpg", ".jpeg", ".json"}
 
 # 已知资源文件：用于「资源根定位」，避免顶层 README 或 images/ 子目录
 # 让包被解成不可加载的结构（此前插件仍提示「已应用」的静默失败）。
-_KNOWN_RESOURCE_SUFFIXES = (".svg", ".png", ".jpg", ".jpeg", ".wav")
-_KNOWN_META_NAMES = ("skin.json", "sound.json", "colors.json")
+_KNOWN_RESOURCE_SUFFIXES = (".svg", ".png", ".jpg", ".jpeg")
+_KNOWN_META_NAMES = ("skin.json", "colors.json")
 
 
 class ZipImportError(ValueError):
@@ -85,14 +72,12 @@ class ImportResult:
         )
 
 
-def _safe_entries(zf: zipfile.ZipFile, target_subdir: str) -> list[zipfile.ZipInfo]:
+def _safe_entries(zf: zipfile.ZipFile) -> list[zipfile.ZipInfo]:
     entries = zf.infolist()
     if not entries:
         raise ZipImportError(_translate("SkinManagerPlugin", "压缩包为空"))
     if len(entries) > _MAX_ENTRIES:
         raise ZipImportError(_translate("SkinManagerPlugin", "文件数超过上限 {limit}").format(limit=_MAX_ENTRIES))
-    max_single, max_total = _LIMITS.get(
-        target_subdir, _LIMITS["sounds"])
     total = 0
     for entry in entries:
         path = PurePosixPath(entry.filename)
@@ -108,13 +93,13 @@ def _safe_entries(zf: zipfile.ZipFile, target_subdir: str) -> list[zipfile.ZipIn
             continue
         if PurePosixPath(entry.filename).suffix.lower() not in _ALLOWED_SUFFIXES:
             raise ZipImportError(_translate("SkinManagerPlugin", "不允许的文件类型: {path}").format(path=entry.filename))
-        if entry.file_size > max_single:
+        if entry.file_size > _MAX_SINGLE:
             raise ZipImportError(
-                _translate("SkinManagerPlugin", "单文件过大（上限 {limit} KB）: {path}").format(limit=max_single // 1024, path=entry.filename))
+                _translate("SkinManagerPlugin", "单文件过大（上限 {limit} KB）: {path}").format(limit=_MAX_SINGLE // 1024, path=entry.filename))
         total += entry.file_size
-        if total > max_total:
+        if total > _MAX_TOTAL:
             raise ZipImportError(
-                _translate("SkinManagerPlugin", "解压后总大小超过上限 {limit} MB").format(limit=max_total // 1024 // 1024))
+                _translate("SkinManagerPlugin", "解压后总大小超过上限 {limit} MB").format(limit=_MAX_TOTAL // 1024 // 1024))
     return entries
 
 
@@ -151,16 +136,15 @@ def import_zip(zip_path: Path | str, target_root: Path) -> ImportResult:
 
     已存在同名包时先备份旧包再替换，任一步失败都回滚，避免「旧包已删、
     新包未就位」的数据丢失。临时目录建在 target_root 之外且以 `_` 开头，
-    避免解压期间被 list_skins/list_packs 当成幽灵皮肤包扫进下拉框。
+    避免解压期间被 list_skins 当成幽灵皮肤包扫进下拉框。
     """
     zip_path = Path(zip_path)
     if not zip_path.is_file():
         raise ZipImportError(_translate("SkinManagerPlugin", "找不到文件: {path}").format(path=zip_path))
     target_root = Path(target_root)
-    target_subdir = target_root.name or "sounds"
 
     with zipfile.ZipFile(zip_path) as zf:
-        entries = _safe_entries(zf, target_subdir)
+        entries = _safe_entries(zf)
 
     # 包名优先取「唯一顶层目录」（与旧行为一致，用户惯用 my_pack/xxx.zip），
     # 否则回退 zip 文件名。顶层多个目录/文件时用文件名，避免歧义。
@@ -208,7 +192,7 @@ def import_zip(zip_path: Path | str, target_root: Path) -> ImportResult:
             has_resource = False
         if not has_resource:
             raise ZipImportError(
-                _translate("SkinManagerPlugin", "压缩包内没有找到任何皮肤/音效资源（可能需要检查目录结构）"))
+                _translate("SkinManagerPlugin", "压缩包内没有找到任何皮肤资源（可能需要检查目录结构）"))
 
         # 把资源根（可能是 staging 的某个子目录）搬到最终 dest，做事务替换。
         backup = None
@@ -235,13 +219,8 @@ def import_zip(zip_path: Path | str, target_root: Path) -> ImportResult:
             raise ZipImportError(_translate("SkinManagerPlugin", "写入资源包失败: {error}").format(error=exc)) from exc
 
     # 读包内 meta 的显示名（共享实现已对非 dict JSON 做类型守卫）
-    from shared_types.sounds import read_meta_name, SKIN_META_FILE, SOUND_META_FILE
-    display = name
-    for meta_name in (SKIN_META_FILE, SOUND_META_FILE):
-        meta = dest / meta_name
-        if meta.is_file():
-            display = read_meta_name(meta, name)
-            break
+    from shared_types.sounds import read_meta_name, SKIN_META_FILE
+    display = read_meta_name(dest / SKIN_META_FILE, name)
     logger.info(f"已导入资源包「{display}」({count} 个文件) -> {dest}")
     return ImportResult(pack_name=name, files=count, display=display)
 

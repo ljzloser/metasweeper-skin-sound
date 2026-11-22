@@ -1,48 +1,20 @@
-"""皮肤与音效管理插件的界面：状态提示 + 重新应用 + 音效试听。
-
-皮肤/音效的选择框均由 config.py 的 ChoiceConfig 在「插件设置」里自动生成，
-这里只显示当前状态与操作提示，不重复做选择器。音效试听区与皮肤区相互独立。
-"""
+"""皮肤管理插件的状态面板。"""
 from __future__ import annotations
 
-from PySide6.QtCore import QCoreApplication, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
-    QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget,
+    QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget,
 )
 
-from shared_types.sounds import SoundEvent
 from utils.plugin_i18n import PluginTranslate
 from utils.translated_widgets import TranslatedLabel as QLabel, TranslatedPushButton as QPushButton
-from PySide6.QtCore import QEvent
 
 _translate = PluginTranslate("SkinManagerPlugin")
 
-# 事件名 -> 中文显示名（源文本，供 lupdate 抽取；运行时走 translate）
-_EVENT_LABELS = {
-    "ready": "就绪", "start": "开局", "open": "开格",
-    "chord": "双击", "flag_on": "插旗", "flag_off": "拔旗",
-    "win": "胜利", "lose": "失败",
-}
-
-
-def _i18n_event_labels() -> None:
-    """lupdate 扫描用哑函数：把事件显示名逐条硬编码进 translate()。"""
-    _translate("SkinManagerPlugin", "就绪")
-    _translate("SkinManagerPlugin", "开局")
-    _translate("SkinManagerPlugin", "开格")
-    _translate("SkinManagerPlugin", "双击")
-    _translate("SkinManagerPlugin", "插旗")
-    _translate("SkinManagerPlugin", "拔旗")
-    _translate("SkinManagerPlugin", "胜利")
-    _translate("SkinManagerPlugin", "失败")
-
-
 class SkinManagerWidget(QWidget):
-    """状态面板：皮肤与音效两个独立分区。"""
+    """显示当前皮肤的应用状态。"""
 
     apply_requested = Signal()
-    # 试听请求（携带事件名字符串），由插件发 SetSoundCommand(play_event=...)
-    sound_preview_requested = Signal(str)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -80,46 +52,7 @@ class SkinManagerWidget(QWidget):
         hint.setStyleSheet("color: gray; font-size: 11px;")
         layout.addWidget(hint)
 
-        # ── 音效区（与皮肤独立）──
-        layout.addSpacing(8)
-        sound_title = QLabel(_translate("SkinManagerPlugin", "音效"))
-        sound_title.setStyleSheet("font-size: 13pt; font-weight: bold;")
-        layout.addWidget(sound_title)
-        sound_tip = QLabel(_translate(
-            "SkinManagerPlugin",
-            "在插件「设置...」里分别设置「启用游戏音效」「音效音量」「当前音效包」，"
-            "与皮肤设置相互独立，互不影响。授权也是独立的 SetSoundCommand。"))
-        sound_tip.setWordWrap(True)
-        layout.addWidget(sound_tip)
-
-        preview_bar = QHBoxLayout()
-        preview_bar.addWidget(QLabel(_translate("SkinManagerPlugin", "试听：")))
-        self._preview_combo = QComboBox()
-        # 遍历枚举派生清单：新增/删除事件不再需要手工维护第二份下拉项，
-        # 也不会漏掉 flag_off 等事件。
-        for event in SoundEvent:
-            label = _EVENT_LABELS.get(event.value, event.value)
-            self._preview_combo.addItem(
-                _translate("SkinManagerPlugin", label), event.value)
-        preview_bar.addWidget(self._preview_combo, 1)
-        preview = QPushButton(_translate("SkinManagerPlugin", "播放"))
-        preview.setToolTip(_translate(
-            "SkinManagerPlugin", "按当前音效设置发送试听请求（需已授权 SetSoundCommand）"))
-        preview.clicked.connect(self._on_preview_clicked)
-        preview_bar.addWidget(preview)
-        layout.addLayout(preview_bar)
-
         layout.addStretch(1)
-
-    def changeEvent(self, event: QEvent) -> None:
-        super().changeEvent(event)
-        if event.type() == QEvent.Type.LanguageChange and hasattr(self, "_preview_combo"):
-            for index in range(self._preview_combo.count()):
-                value = self._preview_combo.itemData(index)
-                self._preview_combo.setItemText(index, _translate("SkinManagerPlugin", _EVENT_LABELS.get(value, value)))
-
-    def _on_preview_clicked(self) -> None:
-        self.sound_preview_requested.emit(self._preview_combo.currentData())
 
     def set_status(self, text: str) -> None:
         self._status.setText(text)
